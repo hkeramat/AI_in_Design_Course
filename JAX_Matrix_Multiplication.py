@@ -1,4 +1,4 @@
-# Students are supposed to run the matrix multiplication and compare the JAX with C++, MATLAB, Numpy, and python loop for a range of matrix dimension to see the differences 
+# Students are supposed to run the matrix multiplication and compare the JAX with C++, MATLAB, Numpy, and python loop for a range of matrix dimensions to see the differences 
 # Feel free to play with it 
 import jax.numpy as jnp
 from jax import grad, jit, vmap
