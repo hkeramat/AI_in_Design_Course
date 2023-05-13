@@ -59,3 +59,72 @@ plt.legend()
 # Show the plot
 plt.show()
 ```
+
+### The 10-arm bandit problem with and without optimistic initial values using the epsilon-greedy algorithm
+```
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the Bandit class
+class Bandit:
+    def __init__(self, k, q_mean=0, q_std=1):
+        self.k = k
+        self.q_true = np.random.normal(q_mean, q_std, k)
+        self.actions = np.arange(k)
+        
+    def get_reward(self, action):
+        return np.random.normal(self.q_true[action], 1)
+    
+
+# Define the epsilon-greedy algorithm
+def epsilon_greedy(bandit, num_steps, epsilon, alpha):
+    q_estimates = np.zeros(bandit.k)
+    action_counts = np.zeros(bandit.k)
+    rewards = np.zeros(num_steps)
+    
+    for step in range(num_steps):
+        if np.random.rand() < epsilon:
+            action = np.random.choice(bandit.actions)
+        else:
+            action = np.argmax(q_estimates)
+        
+        reward = bandit.get_reward(action)
+        action_counts[action] += 1
+        q_estimates[action] += alpha * (reward - q_estimates[action])
+        rewards[step] = reward
+        
+    return action_counts, rewards
+
+
+# Define parameters
+num_bandits = 10
+num_steps = 1000
+epsilon = 0.1
+alpha = 0.1
+optimistic_initial_value = 5.0
+initial_value = 0.0
+
+# Define two bandits with different initial values
+bandit_oiv = Bandit(num_bandits, q_mean=optimistic_initial_value)
+bandit_iv = Bandit(num_bandits, q_mean=initial_value)
+
+# Run epsilon-greedy algorithm with optimistic initial value
+_, reward_oiv = epsilon_greedy(bandit_oiv, num_steps, epsilon, alpha)
+
+# Run epsilon-greedy algorithm with 0 initial value
+_, reward_iv = epsilon_greedy(bandit_iv, num_steps, epsilon, alpha)
+
+# Compute moving average of rewards
+window_size = 10
+reward_oiv_ma = np.convolve(reward_oiv, np.ones(window_size)/window_size, mode='valid')
+reward_iv_ma = np.convolve(reward_iv, np.ones(window_size)/window_size, mode='valid')
+
+# Plot results
+plt.plot(reward_oiv_ma, label='Optimistic Initial Value')
+plt.plot(reward_iv_ma, label='0 Initial Value')
+plt.xlabel('Time Step')
+plt.ylabel('Average Reward')
+plt.title('Effect of Optimistic Initial Value')
+plt.legend()
+plt.show()
+```
